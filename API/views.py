@@ -167,8 +167,19 @@ import io
 @csrf_exempt
 def image_api_v2(request):
     if request.method == 'POST':
-        param = request.POST['mask']
-        img_file = request.FILES['image']
+        # param = request.POST['mask']
+        try:
+            param = request.POST['mask']
+        except: 
+            return JsonResponse({'error': 'Please Add A Mask Range 1-7'})
+            
+        
+        
+        try:
+            img_file = request.FILES['image']
+        except: 
+            return JsonResponse({'error': 'Image File is requird'})
+        
         print(type(param))
         print(param)
         
@@ -234,7 +245,16 @@ def image_api_v2(request):
             head_height = 100
             crop_img = img[int(head_y-head_height-crop_margin):int(head_y+crop_margin), int(head_x-head_width-crop_margin):int(head_x+head_width+crop_margin)]
 
-            # Resize the cropped image
+            if crop_img is None or crop_img.size == 0:
+
+                return JsonResponse({'Face Error (-_-)': 'Program is Unable to dectect the Human Face \n Please provide for Best Reasult provide 1600px'})
+                # return HttpResponse(error_message, status=400)  # Return an error response
+
+            # Resize the image
+            resized_img = cv2.resize(crop_img, (250, 250))
+
+            # Continue processing the resized image as needed
+
             crop_img = cv2.resize(crop_img, (250, 250))
 
             # Create a blank image

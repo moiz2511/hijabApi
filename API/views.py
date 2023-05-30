@@ -12,6 +12,10 @@ import numpy as np
 from PIL import Image
 import cv2
 import numpy as np
+from rembg import remove
+from PIL import Image
+import base64
+import json
 from flask import Flask, request, jsonify
 
 # shirt = cv2.imread(r"C:\Users\Falcon\Downloads\HIJAB\1 (7).png", -1)
@@ -299,24 +303,13 @@ def image_api_v2(request):
             cv2.imwrite('result.png', result)
 
             # Make the API call
-            response = requests.post(
-                'https://api.remove.bg/v1.0/removebg',
-                files={'image_file': open('result.png', 'rb')},
-                data={'size': 'auto'},
-                headers={'X-Api-Key': 'cozRq3K4ReJgYsLYBd2zwJmn'},
-            )
-
-            # Check the response status code
-            if response.status_code == requests.codes.ok:
-                # Save the output image
-                with open('no-bg.png', 'wb') as out:
-                    out.write(response.content)
-                with open('no-bg.png', 'rb') as image_file:
-                    encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
-                return JsonResponse({"Hijab": encoded_image})
-            else:
-                return JsonResponse({'error': 'BG remover not working'})
-
+            input_data = Image.open('result.png')
+            output_data = remove(input_data)
+            output_data.save('no-bg.png')
+            with open('no-bg.png', 'rb') as image_file:
+                encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
+            return JsonResponse({"Hijab": encoded_image})
+            
                 
             
             
